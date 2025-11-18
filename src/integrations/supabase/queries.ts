@@ -21,16 +21,17 @@ export const getEntradas = async () => {
       whatsapp,
       created_at,
       conta_financeira_id,
+      user_id,
       categorias:categoria_id ( id, nome, tipo, descricao, cor_hex ),
       contas_financeiras:conta_financeira_id ( id, nome_conta, tipo_conta, saldo )
     `)
     .order('data', { ascending: false });
-    
+
   if (error) {
     console.error('Erro ao buscar entradas:', error);
     throw new Error('Erro ao buscar entradas');
   }
-  
+
   return data as (Entrada & { categorias: Categoria | null, contas_financeiras: ContaFinanceira | null })[];
 };
 
@@ -40,12 +41,12 @@ export const createEntrada = async (entrada: Omit<Entrada, 'id' | 'created_at'>)
     .insert([entrada])
     .select()
     .single();
-    
+
   if (error) {
     console.error('Erro ao criar entrada:', error);
     throw new Error('Erro ao criar entrada');
   }
-  
+
   return data as Entrada;
 };
 
@@ -56,12 +57,12 @@ export const updateEntrada = async (id: number, entrada: Partial<Omit<Entrada, '
     .eq('id', id)
     .select()
     .single();
-    
+
   if (error) {
     console.error('Erro ao atualizar entrada:', error);
     throw new Error('Erro ao atualizar entrada');
   }
-  
+
   return data as Entrada;
 };
 
@@ -70,12 +71,12 @@ export const deleteEntrada = async (id: number) => {
     .from('entradas')
     .delete()
     .eq('id', id);
-    
+
   if (error) {
     console.error('Erro ao deletar entrada:', error);
     throw new Error('Erro ao deletar entrada');
   }
-  
+
   return true;
 };
 
@@ -95,12 +96,12 @@ export const getSaidas = async () => {
       contas_financeiras:conta_financeira_id ( id, nome_conta, tipo_conta, saldo )
     `)
     .order('data', { ascending: false });
-    
+
   if (error) {
     console.error('Erro ao buscar saídas:', error);
     throw new Error('Erro ao buscar saídas');
   }
-  
+
   return data as (Saida & { categorias: Categoria | null, contas_financeiras: ContaFinanceira | null })[];
 };
 
@@ -110,12 +111,12 @@ export const createSaida = async (saida: Omit<Saida, 'id' | 'created_at'>) => {
     .insert([saida])
     .select()
     .single();
-    
+
   if (error) {
     console.error('Erro ao criar saída:', error);
     throw new Error('Erro ao criar saída');
   }
-  
+
   return data as Saida;
 };
 
@@ -126,12 +127,12 @@ export const updateSaida = async (id: number, saida: Partial<Omit<Saida, 'id' | 
     .eq('id', id)
     .select()
     .single();
-    
+
   if (error) {
     console.error('Erro ao atualizar saída:', error);
     throw new Error('Erro ao atualizar saída');
   }
-  
+
   return data as Saida;
 };
 
@@ -140,12 +141,12 @@ export const deleteSaida = async (id: number) => {
     .from('saidas')
     .delete()
     .eq('id', id);
-    
+
   if (error) {
     console.error('Erro ao deletar saída:', error);
     throw new Error('Erro ao deletar saída');
   }
-  
+
   return true;
 };
 
@@ -155,12 +156,12 @@ export const getCategorias = async () => {
     .from('categorias')
     .select('*')
     .order('nome');
-    
+
   if (error) {
     console.error('Erro ao buscar categorias:', error);
     throw new Error('Erro ao buscar categorias');
   }
-  
+
   return data as Categoria[];
 };
 
@@ -170,12 +171,12 @@ export const getCategoriasByType = async (tipo: 'entrada' | 'saida') => {
     .select('*')
     .eq('tipo', tipo)
     .order('nome');
-    
+
   if (error) {
     console.error('Erro ao buscar categorias:', error);
     throw new Error('Erro ao buscar categorias');
   }
-  
+
   return data as Categoria[];
 };
 
@@ -185,12 +186,12 @@ export const getEntradasSaidasMensal = async () => {
     .from('vw_entradas_saidas_mensal')
     .select('*')
     .order('mes');
-    
+
   if (error) {
     console.error('Erro ao buscar dados mensais:', error);
     throw new Error('Erro ao buscar dados mensais');
   }
-  
+
   return data as Database['public']['Views']['vw_entradas_saidas_mensal']['Row'][];
 };
 
@@ -199,12 +200,12 @@ export const getSaidasPorCategoria = async () => {
     .from('vw_saidas_por_categoria')
     .select('*')
     .order('total_saidas', { ascending: false });
-    
+
   if (error) {
     console.error('Erro ao buscar dados por categoria:', error);
     throw new Error('Erro ao buscar dados por categoria');
   }
-  
+
   return data as Database['public']['Views']['vw_saidas_por_categoria']['Row'][];
 };
 
@@ -213,12 +214,12 @@ export const getSaldoDiario = async () => {
     .from('vw_saldo_diario')
     .select('*')
     .order('dia');
-    
+
   if (error) {
     console.error('Erro ao buscar saldo diário:', error);
     throw new Error('Erro ao buscar saldo diário');
   }
-  
+
   return data as Database['public']['Views']['vw_saldo_diario']['Row'][];
 };
 
@@ -228,14 +229,14 @@ export const getTotalEntradas = async () => {
     .from('entradas')
     .select('valor', { count: 'exact' })
     .gt('valor', 0);
-    
+
   if (error) {
     console.error('Erro ao buscar total de entradas:', error);
     throw new Error('Erro ao buscar total de entradas');
   }
-  
+
   const total = data?.reduce((sum, item) => sum + Number(item.valor), 0) || 0;
-  
+
   return {
     total,
     count: data.length
@@ -247,14 +248,14 @@ export const getTotalSaidas = async () => {
     .from('saidas')
     .select('valor', { count: 'exact' })
     .gt('valor', 0);
-    
+
   if (error) {
     console.error('Erro ao buscar total de saídas:', error);
     throw new Error('Erro ao buscar total de saídas');
   }
-  
+
   const total = data?.reduce((sum, item) => sum + Number(item.valor), 0) || 0;
-  
+
   return {
     total,
     count: data.length
@@ -267,7 +268,7 @@ export const getSaldoAtual = async () => {
     getTotalEntradas(),
     getTotalSaidas()
   ]);
-  
+
   return entradas.total - saidas.total;
 };
 
@@ -296,12 +297,12 @@ export const getContas = async (tipo?: 'a_pagar' | 'a_receber') => {
   }
 
   const { data, error } = await query;
-  
+
   if (error) {
     console.error('Erro ao buscar contas:', error);
     throw new Error(`Erro ao buscar contas: ${error.message}`);
   }
-  
+
   return data as (Conta & { categorias: Categoria | null })[];
 };
 
@@ -324,12 +325,12 @@ export const getContasAPagar = async () => {
     `)
     .eq('tipo', 'a_pagar')
     .order('data_vencimento', { ascending: true });
-    
+
   if (error) {
     console.error('Erro ao buscar contas a pagar:', error);
     throw new Error(`Erro ao buscar contas a pagar: ${error.message}`);
   }
-  
+
   return data as (Conta & { categorias: Categoria | null })[];
 };
 
@@ -352,12 +353,12 @@ export const getContasAReceber = async () => {
     `)
     .eq('tipo', 'a_receber')
     .order('data_vencimento', { ascending: true });
-    
+
   if (error) {
     console.error('Erro ao buscar contas a receber:', error);
     throw new Error(`Erro ao buscar contas a receber: ${error.message}`);
   }
-  
+
   return data as (Conta & { categorias: Categoria | null })[];
 };
 
@@ -379,12 +380,12 @@ export const createConta = async (conta: Omit<Conta, 'id' | 'created_at'>) => {
       grupo_parcelamento_id
     `)
     .single();
-    
+
   if (error) {
     console.error('Erro ao criar conta:', error);
     throw new Error(`Erro ao criar conta: ${error.message}`);
   }
-  
+
   return data as Conta;
 };
 
@@ -407,12 +408,12 @@ export const updateConta = async (id: number, conta: Partial<Omit<Conta, 'id' | 
       grupo_parcelamento_id
     `)
     .single();
-    
+
   if (error) {
     console.error('Erro ao atualizar conta:', error);
     throw new Error(`Erro ao atualizar conta: ${error.message}`);
   }
-  
+
   return data as Conta;
 };
 
@@ -421,12 +422,12 @@ export const deleteConta = async (id: number) => {
     .from('contas')
     .delete()
     .eq('id', id);
-    
+
   if (error) {
     console.error('Erro ao deletar conta:', error);
     throw new Error(`Erro ao deletar conta: ${error.message}`);
   }
-  
+
   return true;
 };
 
@@ -435,12 +436,12 @@ export const deleteCategoria = async (id: number) => {
     .from('categorias')
     .delete()
     .eq('id', id);
-    
+
   if (error) {
     console.error('Erro ao deletar categoria:', error);
     throw new Error('Erro ao deletar categoria');
   }
-  
+
   return true;
 };
 
@@ -450,12 +451,12 @@ export const createCategoria = async (categoria: Omit<Categoria, 'id'>) => {
     .insert([categoria])
     .select()
     .single();
-    
+
   if (error) {
     console.error('Erro ao criar categoria:', error);
     throw new Error('Erro ao criar categoria');
   }
-  
+
   return data as Categoria;
 };
 
@@ -466,12 +467,12 @@ export const updateCategoria = async (id: number, categoria: Partial<Omit<Catego
     .eq('id', id)
     .select()
     .single();
-    
+
   if (error) {
     console.error('Erro ao atualizar categoria:', error);
     throw new Error('Erro ao atualizar categoria');
   }
-  
+
   return data as Categoria;
 };
 
@@ -495,12 +496,12 @@ export const getContasAVencer = async () => {
       categorias:categoria_id ( id, nome, tipo, descricao, cor_hex )
     `)
     .order('data_vencimento', { ascending: true });
-    
+
   if (error) {
     console.error('Erro ao buscar contas a vencer:', error);
     throw new Error(`Erro ao buscar contas a vencer: ${error.message}`);
   }
-  
+
   return data as (Database['public']['Views']['vw_contas_vencer']['Row'] & { categorias: Categoria | null })[];
 };
 
@@ -521,12 +522,12 @@ export const getContasVencidas = async () => {
       categorias:categoria_id ( id, nome, tipo, descricao, cor_hex )
     `)
     .order('data_vencimento', { ascending: true });
-    
+
   if (error) {
     console.error('Erro ao buscar contas vencidas:', error);
     throw new Error(`Erro ao buscar contas vencidas: ${error.message}`);
   }
-  
+
   return data as (Database['public']['Views']['vw_contas_vencidas']['Row'] & { categorias: Categoria | null })[];
 };
 
@@ -536,12 +537,12 @@ export const getTarefas = async () => {
     .from('tarefas')
     .select('*')
     .order('created_at', { ascending: false });
-    
+
   if (error) {
     console.error('Erro ao buscar tarefas:', error);
     throw new Error('Erro ao buscar tarefas');
   }
-  
+
   return data as Tarefa[];
 };
 
@@ -551,12 +552,12 @@ export const createTarefa = async (tarefa: Omit<Tarefa, 'id' | 'created_at'>) =>
     .insert([tarefa])
     .select()
     .single();
-    
+
   if (error) {
     console.error('Erro ao criar tarefa:', error);
     throw new Error('Erro ao criar tarefa');
   }
-  
+
   return data as Tarefa;
 };
 
@@ -567,12 +568,12 @@ export const updateTarefa = async (id: number, tarefa: Partial<Omit<Tarefa, 'id'
     .eq('id', id)
     .select()
     .single();
-    
+
   if (error) {
     console.error('Erro ao atualizar tarefa:', error);
     throw new Error('Erro ao atualizar tarefa');
   }
-  
+
   return data as Tarefa;
 };
 
@@ -581,12 +582,12 @@ export const deleteTarefa = async (id: number) => {
     .from('tarefas')
     .delete()
     .eq('id', id);
-    
+
   if (error) {
     console.error('Erro ao deletar tarefa:', error);
     throw new Error('Erro ao deletar tarefa');
   }
-  
+
   return true;
 };
 
@@ -596,12 +597,12 @@ export const getCartoes = async () => {
     .from('cartoes')
     .select('*')
     .order('criado_em', { ascending: false });
-    
+
   if (error) {
     console.error('Erro ao buscar cartões:', error);
     throw new Error('Erro ao buscar cartões');
   }
-  
+
   return data as Cartao[];
 };
 
@@ -611,12 +612,12 @@ export const createCartao = async (cartao: Omit<Cartao, 'id' | 'criado_em'>) => 
     .insert([cartao])
     .select()
     .single();
-    
+
   if (error) {
     console.error('Erro ao criar cartão:', error);
     throw new Error('Erro ao criar cartão');
   }
-  
+
   return data as Cartao;
 };
 
@@ -627,12 +628,12 @@ export const updateCartao = async (id: number, cartao: Partial<Omit<Cartao, 'id'
     .eq('id', id)
     .select()
     .single();
-    
+
   if (error) {
     console.error('Erro ao atualizar cartão:', error);
     throw new Error('Erro ao atualizar cartão');
   }
-  
+
   return data as Cartao;
 };
 
@@ -641,12 +642,12 @@ export const deleteCartao = async (id: number) => {
     .from('cartoes')
     .delete()
     .eq('id', id);
-    
+
   if (error) {
     console.error('Erro ao deletar cartão:', error);
     throw new Error('Erro ao deletar cartão');
   }
-  
+
   return true;
 };
 
@@ -656,12 +657,12 @@ export const getContasFinanceiras = async () => {
     .from('contas_financeiras')
     .select('*')
     .order('created_at', { ascending: false });
-    
+
   if (error) {
     console.error('Erro ao buscar contas financeiras:', error);
     throw new Error('Erro ao buscar contas financeiras');
   }
-  
+
   return data as ContaFinanceira[];
 };
 
@@ -671,12 +672,12 @@ export const createContaFinanceira = async (conta: Omit<ContaFinanceira, 'id' | 
     .insert([conta])
     .select()
     .single();
-    
+
   if (error) {
     console.error('Erro ao criar conta financeira:', error);
     throw new Error('Erro ao criar conta financeira');
   }
-  
+
   return data as ContaFinanceira;
 };
 
@@ -687,12 +688,12 @@ export const updateContaFinanceira = async (id: number, conta: Partial<Omit<Cont
     .eq('id', id)
     .select()
     .single();
-    
+
   if (error) {
     console.error('Erro ao atualizar conta financeira:', error);
     throw new Error('Erro ao atualizar conta financeira');
   }
-  
+
   return data as ContaFinanceira;
 };
 
@@ -701,12 +702,12 @@ export const deleteContaFinanceira = async (id: number) => {
     .from('contas_financeiras')
     .delete()
     .eq('id', id);
-    
+
   if (error) {
     console.error('Erro ao deletar conta financeira:', error);
     throw new Error('Erro ao deletar conta financeira');
   }
-  
+
   return true;
 };
 
@@ -728,12 +729,12 @@ export const getEntradasPorPeriodo = async (dataInicio: string, dataFim: string)
     .gte('data', dataInicio)
     .lte('data', dataFim)
     .order('data', { ascending: false });
-    
+
   if (error) {
     console.error('Erro ao buscar entradas por período:', error);
     throw new Error('Erro ao buscar entradas por período');
   }
-  
+
   return data as (Entrada & { categorias: Categoria | null, contas_financeiras: ContaFinanceira | null })[];
 };
 
@@ -754,12 +755,12 @@ export const getSaidasPorPeriodo = async (dataInicio: string, dataFim: string) =
     .gte('data', dataInicio)
     .lte('data', dataFim)
     .order('data', { ascending: false });
-    
+
   if (error) {
     console.error('Erro ao buscar saídas por período:', error);
     throw new Error('Erro ao buscar saídas por período');
   }
-  
+
   return data as (Saida & { categorias: Categoria | null, contas_financeiras: ContaFinanceira | null })[];
 };
 
@@ -780,12 +781,12 @@ export const getEntradasComDetalhes = async () => {
       contas_financeiras:conta_financeira_id ( id, nome_conta, tipo_conta, saldo )
     `)
     .order('data', { ascending: false });
-    
+
   if (error) {
     console.error('Erro ao buscar entradas com detalhes:', error);
     throw new Error('Erro ao buscar entradas com detalhes');
   }
-  
+
   return data as (Entrada & { categorias: Categoria | null, contas_financeiras: ContaFinanceira | null })[];
 };
 
@@ -805,12 +806,12 @@ export const getSaidasComDetalhes = async () => {
       contas_financeiras:conta_financeira_id ( id, nome_conta, tipo_conta, saldo )
     `)
     .order('data', { ascending: false });
-    
+
   if (error) {
     console.error('Erro ao buscar saídas com detalhes:', error);
     throw new Error('Erro ao buscar saídas com detalhes');
   }
-  
+
   return data as (Saida & { categorias: Categoria | null, contas_financeiras: ContaFinanceira | null })[];
 };
 

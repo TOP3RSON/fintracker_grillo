@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { Layout } from "./components/Layout";
+import { UserProvider } from "./contexts/UserContext";
 import Dashboard from "./pages/Dashboard";
 import Entradas from "./pages/Entradas";
 import Saidas from "./pages/Saidas";
@@ -26,23 +27,25 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
-          <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Layout><Dashboard /></Layout>} />
-          <Route path="/entradas" element={<Layout><Entradas /></Layout>} />
-          <Route path="/saidas" element={<Layout><Saidas /></Layout>} />
-          <Route path="/categorias" element={<Layout><Categorias /></Layout>} />
-          <Route path="/tarefas" element={<Layout><Tarefas /></Layout>} />
-          <Route path="/configuracoes/cartoes" element={<Layout><Cartoes /></Layout>} />
-          <Route path="/contas/pagar" element={<Layout><ContasPagar /></Layout>} />
-          <Route path="/contas/receber" element={<Layout><ContasReceber /></Layout>} />
+        <UserProvider>
+          <BrowserRouter>
+            <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={<Layout><Dashboard /></Layout>} />
+            <Route path="/entradas" element={<Layout><Entradas /></Layout>} />
+            <Route path="/saidas" element={<Layout><Saidas /></Layout>} />
+            <Route path="/categorias" element={<Layout><Categorias /></Layout>} />
+            <Route path="/tarefas" element={<Layout><Tarefas /></Layout>} />
+            <Route path="/configuracoes/cartoes" element={<Layout><Cartoes /></Layout>} />
+            <Route path="/contas/pagar" element={<Layout><ContasPagar /></Layout>} />
+            <Route path="/contas/receber" element={<Layout><ContasReceber /></Layout>} />
 
-          <Route path="/configuracoes/contas" element={<Layout><ConfiguracoesContas /></Layout>} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+            <Route path="/configuracoes/contas" element={<Layout><ConfiguracoesContas /></Layout>} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </UserProvider>
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
