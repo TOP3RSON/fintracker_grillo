@@ -1,42 +1,48 @@
-# Multi-stage build for FinTracker application
-# Stage 1: Build the application
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 # Set working directory
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY package.json bun.lockb* package-lock.json* ./
 
 # Install dependencies
-RUN npm ci
+RUN if [ -f "bun.lockb" ]; then \
+      echo "Installing with Bun..." && \
+      curl -fsSL https://bun.sh/install | bash && \
+      export PATH="/root/.bun/bin:$PATH" && \
+      bun install --frozen-lockfile; \
+    elif [ -f "package-lock.json" ]; then \
+      echo "Installing with npm..." && \
+      npm ci --legacy-peer-deps; \
+    else \
+      echo "Installing with npm (fallback)..." && \
+      npm install; \
+    fi
 
-# Copy the rest of the application code
+# Copy source code
 COPY . .
 
-# Build the application for production
-RUN npm run build
+# Build the application
+RUN if [ -f "bun.lockb" ]; then \
+      export PATH="/root/.bun/bin:$PATH" && \
+      bun run build; \
+    else \
+      npm run build; \
+    fi
 
-# Stage 2: Serve the application with Nginx
-FROM nginx:stable-alpine
+# Production stage
+FROM nginx:alpine
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+# Copy nginx configuration
+RUN rm -rf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy custom Nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
-
-# Remove default Nginx files
-RUN rm -rf /usr/share/nginx/html/*
-
-# Copy the built application to Nginx's html directory
+# Copy built application to nginx html directory
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Expose port 80 (standard HTTP port for Nginx)
+# Expose port 80
 EXPOSE 80
 
-# Use dumb-init to handle signals properly
-ENTRYPOINT ["dumb-init"]
-
-# Start Nginx server
+# Start nginx
 CMD ["nginx", "-g", "daemon off;"]
