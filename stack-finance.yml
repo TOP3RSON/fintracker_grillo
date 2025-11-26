@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   finance:
-    image: fintracker:latest
+    image: grillo-finance-app:latest
     networks:
       - network_public
     deploy:
@@ -16,7 +16,8 @@ services:
         - "traefik.http.routers.finance-https.rule=Host(`finance.grillo.tec.br`)"
         - "traefik.http.routers.finance-https.entrypoints=websecure"
         - "traefik.http.routers.finance-https.tls=true"
-        - "traefik.http.routers.finance-https.tls.certresolver=letsencrypt"
+        - "traefik.http.routers.finance-https.tls.certresolver=letsencryptresolver"
+
 
         # Serviço interno (Nginx expõe 80)
         - "traefik.http.services.finance.loadbalancer.server.port=80"
